@@ -1,5 +1,7 @@
 import React from 'react';
 import { EditorKit, EditorKitDelegate } from 'sn-editor-kit';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import CustomEditor from './CustomEditor';
 
 export enum HtmlElementId {
   snComponent = 'sn-component',
@@ -12,13 +14,13 @@ export enum HtmlClassName {
 }
 
 export interface EditorInterface {
-  printUrl: boolean;
-  text: string;
+  // printUrl: boolean;
+  html: string;
 }
 
 const initialState = {
-  printUrl: false,
-  text: '',
+  // printUrl: false,
+  html: '',
 };
 
 let keyMap = new Map();
@@ -35,10 +37,10 @@ export default class Editor extends React.Component<{}, EditorInterface> {
   configureEditorKit = () => {
     let delegate = new EditorKitDelegate({
       /** This loads every time a different note is loaded */
-      setEditorRawText: (text: string) => {
+      setEditorRawText: (html: string) => {
         this.setState({
           ...initialState,
-          text,
+          html,
         });
       },
       clearUndoHistory: () => {},
@@ -47,21 +49,15 @@ export default class Editor extends React.Component<{}, EditorInterface> {
 
     this.editorKit = new EditorKit({
       delegate: delegate,
-      mode: 'plaintext',
+      mode: 'html',
       supportsFilesafe: false,
     });
   };
 
-  handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const target = event.target;
-    const value = target.value;
-    this.saveText(value);
-  };
-
-  saveText = (text: string) => {
-    this.saveNote(text);
+  saveText = (html: string) => {
+    this.saveNote(html);
     this.setState({
-      text: text,
+      html,
     });
   };
 
@@ -76,10 +72,6 @@ export default class Editor extends React.Component<{}, EditorInterface> {
     }
   };
 
-  onBlur = (e: React.FocusEvent) => {};
-
-  onFocus = (e: React.FocusEvent) => {};
-
   onKeyDown = (e: React.KeyboardEvent | KeyboardEvent) => {
     keyMap.set(e.key, true);
     // Do nothing if 'Control' and 's' are pressed
@@ -93,52 +85,16 @@ export default class Editor extends React.Component<{}, EditorInterface> {
   };
 
   render() {
-    const { text } = this.state;
+    const { html } = this.state;
     return (
-      <div
-        className={
-          HtmlElementId.snComponent + (this.state.printUrl ? ' print-url' : '')
-        }
-        id={HtmlElementId.snComponent}
-        tabIndex={0}
-      >
-        <p>
-          Edit <code>src/components/Editor.tsx</code> and save to reload.
-        </p>
-        <p>
-          Visit the{' '}
-          <a
-            href="https://docs.standardnotes.org/extensions/intro"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Standard Notes documentation
-          </a>{' '}
-          to learn how to work with the Standard Notes API or{' '}
-          <a
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-          .
-        </p>
-        <textarea
-          id={HtmlElementId.textarea}
-          name="text"
-          className={'sk-input contrast textarea'}
-          placeholder="Type here. Text in this textarea is automatically saved in Standard Notes"
-          rows={15}
-          spellCheck="true"
-          value={text}
-          onBlur={this.onBlur}
-          onChange={this.handleInputChange}
-          onFocus={this.onFocus}
-          onKeyDown={this.onKeyDown}
-          onKeyUp={this.onKeyUp}
-        />
-      </div>
+      <CKEditor
+        editor={CustomEditor}
+        data={html}
+        onChange={(event: any, editor: any) => {
+          const data = editor.getData();
+          this.saveText(data);
+        }}
+      />
     );
   }
 }
