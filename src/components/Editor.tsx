@@ -1,5 +1,8 @@
 import React from 'react';
 import { EditorKit, EditorKitDelegate } from 'sn-editor-kit';
+import editor from 'ckeditor5-custom-build/build/ckeditor';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import { debounce } from 'lodash';
 
 export enum HtmlElementId {
   snComponent = 'sn-component',
@@ -12,32 +15,71 @@ export enum HtmlClassName {
 }
 
 export interface EditorInterface {
-  printUrl: boolean;
   text: string;
 }
 
 const initialState = {
-  printUrl: false,
   text: '',
 };
 
 let keyMap = new Map();
+
+const defaultEditorConfig = {
+  toolbar: {
+    items: [
+      'heading',
+      '|',
+      'bold',
+      'italic',
+      'underline',
+      'link',
+      'fontSize',
+      'highlight',
+      'fontFamily',
+      'codeBlock',
+      'code',
+      'removeFormat',
+      '|',
+      'todoList',
+      'bulletedList',
+      'numberedList',
+      '|',
+      'outdent',
+      'indent',
+      'horizontalLine',
+      '|',
+      'imageUpload',
+      'toggleImageCaption',
+      'imageTextAlternative',
+      '|',
+      'blockQuote',
+      'insertTable',
+      'htmlEmbed',
+      'mediaEmbed',
+      'undo',
+      'redo',
+    ],
+  },
+  language: 'en',
+};
 
 export default class Editor extends React.Component<{}, EditorInterface> {
   editorKit: any;
 
   constructor(props: EditorInterface) {
     super(props);
-    this.configureEditorKit();
     this.state = initialState;
   }
+
+  componentDidMount = () => {
+    this.configureEditorKit();
+  };
 
   configureEditorKit = () => {
     let delegate = new EditorKitDelegate({
       /** This loads every time a different note is loaded */
       setEditorRawText: (text: string) => {
         this.setState({
-          ...initialState,
           text,
         });
       },
@@ -47,21 +89,15 @@ export default class Editor extends React.Component<{}, EditorInterface> {
 
     this.editorKit = new EditorKit({
       delegate: delegate,
-      mode: 'plaintext',
+      mode: 'html',
       supportsFilesafe: false,
     });
-  };
-
-  handleInputChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const target = event.target;
-    const value = target.value;
-    this.saveText(value);
   };
 
   saveText = (text: string) => {
     this.saveNote(text);
     this.setState({
-      text: text,
+      text,
     });
   };
 
@@ -92,53 +128,19 @@ export default class Editor extends React.Component<{}, EditorInterface> {
     keyMap.delete(e.key);
   };
 
+  handleInputChange = debounce((event: any, editor: any) => {
+    this.saveText(editor.getData());
+  }, 500);
+
   render() {
     const { text } = this.state;
     return (
-      <div
-        className={
-          HtmlElementId.snComponent + (this.state.printUrl ? ' print-url' : '')
-        }
-        id={HtmlElementId.snComponent}
-        tabIndex={0}
-      >
-        <p>
-          Edit <code>src/components/Editor.tsx</code> and save to reload.
-        </p>
-        <p>
-          Visit the{' '}
-          <a
-            href="https://docs.standardnotes.org/extensions/intro"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Standard Notes documentation
-          </a>{' '}
-          to learn how to work with the Standard Notes API or{' '}
-          <a
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-          .
-        </p>
-        <textarea
-          id={HtmlElementId.textarea}
-          name="text"
-          className={'sk-input contrast textarea'}
-          placeholder="Type here. Text in this textarea is automatically saved in Standard Notes"
-          rows={15}
-          spellCheck="true"
-          value={text}
-          onBlur={this.onBlur}
-          onChange={this.handleInputChange}
-          onFocus={this.onFocus}
-          onKeyDown={this.onKeyDown}
-          onKeyUp={this.onKeyUp}
-        />
-      </div>
+      <CKEditor
+        editor={editor}
+        config={defaultEditorConfig}
+        data={text}
+        onChange={this.handleInputChange}
+      />
     );
   }
 }

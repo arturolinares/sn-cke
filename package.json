@@ -37,6 +37,7 @@
     "pretty": "prettier --write 'src/**/*.{html,css,scss,js,jsx,ts,tsx,json}' README.md"
   },
   "dependencies": {
+    "@ckeditor/ckeditor5-react": "^3.0.2",
     "@testing-library/dom": "^7.29.0",
     "@testing-library/jest-dom": "^5.11.6",
     "@testing-library/react": "^11.2.2",
@@ -46,6 +47,7 @@
     "@types/node": "^14.14.14",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0",
+    "ckeditor5-custom-build": "file:./ckeditor5",
     "filesafe-embed": "^1.0.10",
     "filesafe-js": "^1.0.4",
     "gh-pages": "^3.1.0",
