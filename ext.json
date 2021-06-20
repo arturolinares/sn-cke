@@ -1,0 +1,13 @@
+{
+  "identifier": "com.github.arturolinares.sn-cke",
+  "name": "sn-ckeditor",
+  "content_type": "SN|Component",
+  "area": "editor-editor",
+  "version": "0.1.0",
+  "description": "A very friendly HTML editor meant for complex notes. It uses the popular and battle tested CKEditor.",
+  "url": "http://localhost:3001/index.html",
+  "download_url": "",
+  "latest_url": "",
+  "marketing_url": "https://github.com/standardnotes/editor-template-cra-typescript",
+  "thumbnail_url": ""
+}
